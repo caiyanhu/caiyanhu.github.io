@@ -1,0 +1,994 @@
+<!DOCTYPE html>
+
+
+
+
+
+
+
+
+
+
+
+
+  
+
+
+<html class="theme-next muse use-motion" lang="zh-CN">
+<head>
+  <meta charset="UTF-8"/>
+<meta http-equiv="X-UA-Compatible" content="IE=edge" />
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=2"/>
+<meta name="theme-color" content="#222">
+
+
+
+
+
+
+
+
+
+
+
+
+<meta http-equiv="Cache-Control" content="no-transform" />
+<meta http-equiv="Cache-Control" content="no-siteapp" />
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<link href="/lib/font-awesome/css/font-awesome.min.css?v=4.6.2" rel="stylesheet" type="text/css" />
+
+<link href="/css/main.css?v=6.3.0" rel="stylesheet" type="text/css" />
+
+
+  <link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon-next.png?v=6.3.0">
+
+
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/favicon-32x32-next.png?v=6.3.0">
+
+
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/favicon-16x16-next.png?v=6.3.0">
+
+
+  <link rel="mask-icon" href="/images/logo.svg?v=6.3.0" color="#222">
+
+
+
+
+
+
+
+
+
+<script type="text/javascript" id="hexo.configurations">
+  var NexT = window.NexT || {};
+  var CONFIG = {
+    root: '/',
+    scheme: 'Muse',
+    version: '6.3.0',
+    sidebar: {"position":"left","display":"post","offset":12,"b2t":false,"scrollpercent":false,"onmobile":false},
+    fancybox: false,
+    fastclick: false,
+    lazyload: false,
+    tabs: true,
+    motion: {"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"slideDownIn","post_body":"slideDownIn","coll_header":"slideLeftIn","sidebar":"slideUpIn"}},
+    algolia: {
+      applicationID: '',
+      apiKey: '',
+      indexName: '',
+      hits: {"per_page":10},
+      labels: {"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}
+    }
+  };
+</script>
+
+
+  
+
+
+
+
+  <meta name="description" content="比较JS提供了三种方式来进行比较操作  == 比较宽松的相等比较 === 严格相等 Object.is ES6新增  ==如果操作数不是同一类型时会对操作数进行类型转换，然后进行严格比较。如果操作数都是对象（引用），就检查是否指向内存中的同一对象。 1234567891011121314151617181920212223242526271 == 1 //true&apos;1&apos; == 1 //true1">
+<meta name="keywords" content="React,JavaScript">
+<meta property="og:type" content="article">
+<meta property="og:title" content="浅比较与PureComponent">
+<meta property="og:url" content="http://yoursite.com/2018/07/20/浅比较与PureComponent/index.html">
+<meta property="og:site_name" content="Akil写字的地方">
+<meta property="og:description" content="比较JS提供了三种方式来进行比较操作  == 比较宽松的相等比较 === 严格相等 Object.is ES6新增  ==如果操作数不是同一类型时会对操作数进行类型转换，然后进行严格比较。如果操作数都是对象（引用），就检查是否指向内存中的同一对象。 1234567891011121314151617181920212223242526271 == 1 //true&apos;1&apos; == 1 //true1">
+<meta property="og:locale" content="zh-CN">
+<meta property="og:image" content="http://opffh6qw3.bkt.clouddn.com/blog/images/compare.png">
+<meta property="og:updated_time" content="2018-07-20T09:08:04.951Z">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="浅比较与PureComponent">
+<meta name="twitter:description" content="比较JS提供了三种方式来进行比较操作  == 比较宽松的相等比较 === 严格相等 Object.is ES6新增  ==如果操作数不是同一类型时会对操作数进行类型转换，然后进行严格比较。如果操作数都是对象（引用），就检查是否指向内存中的同一对象。 1234567891011121314151617181920212223242526271 == 1 //true&apos;1&apos; == 1 //true1">
+<meta name="twitter:image" content="http://opffh6qw3.bkt.clouddn.com/blog/images/compare.png">
+
+
+
+
+
+
+  <link rel="canonical" href="http://yoursite.com/2018/07/20/浅比较与PureComponent/"/>
+
+
+
+<script type="text/javascript" id="page.configurations">
+  CONFIG.page = {
+    sidebar: "",
+  };
+</script>
+
+  <title>浅比较与PureComponent | Akil写字的地方</title>
+  
+
+
+
+
+
+
+
+
+
+  <noscript>
+  <style type="text/css">
+    .use-motion .motion-element,
+    .use-motion .brand,
+    .use-motion .menu-item,
+    .sidebar-inner,
+    .use-motion .post-block,
+    .use-motion .pagination,
+    .use-motion .comments,
+    .use-motion .post-header,
+    .use-motion .post-body,
+    .use-motion .collection-title { opacity: initial; }
+
+    .use-motion .logo,
+    .use-motion .site-title,
+    .use-motion .site-subtitle {
+      opacity: initial;
+      top: initial;
+    }
+
+    .use-motion {
+      .logo-line-before i { left: initial; }
+      .logo-line-after i { right: initial; }
+    }
+  </style>
+</noscript>
+
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage" lang="zh-CN">
+
+  
+  
+    
+  
+
+  <div class="container sidebar-position-left page-post-detail">
+    <div class="headband"></div>
+
+    <header id="header" class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-wrapper">
+  <div class="site-meta ">
+    
+
+    <div class="custom-logo-site-title">
+      <a href="/" class="brand" rel="start">
+        <span class="logo-line-before"><i></i></span>
+        <span class="site-title">Akil写字的地方</span>
+        <span class="logo-line-after"><i></i></span>
+      </a>
+    </div>
+    
+  </div>
+
+  <div class="site-nav-toggle">
+    <button aria-label="切换导航栏">
+      <span class="btn-bar"></span>
+      <span class="btn-bar"></span>
+      <span class="btn-bar"></span>
+    </button>
+  </div>
+</div>
+
+
+
+<nav class="site-nav">
+  
+    <ul id="menu" class="menu">
+      
+        
+        
+        
+          
+          <li class="menu-item menu-item-home">
+    <a href="/" rel="section">
+      <i class="menu-item-icon fa fa-fw fa-home"></i> <br />首页</a>
+  </li>
+        
+        
+        
+          
+          <li class="menu-item menu-item-about">
+    <a href="/about/" rel="section">
+      <i class="menu-item-icon fa fa-fw fa-user"></i> <br />关于</a>
+  </li>
+        
+        
+        
+          
+          <li class="menu-item menu-item-tags">
+    <a href="/tags/" rel="section">
+      <i class="menu-item-icon fa fa-fw fa-tags"></i> <br />标签<span class="badge">3</span></a>
+  </li>
+        
+        
+        
+          
+          <li class="menu-item menu-item-categories">
+    <a href="/categories/" rel="section">
+      <i class="menu-item-icon fa fa-fw fa-th"></i> <br />分类<span class="badge">1</span></a>
+  </li>
+
+      
+      
+    </ul>
+  
+
+  
+    
+
+  
+
+  
+</nav>
+
+
+
+  
+
+
+
+</div>
+    </header>
+
+    
+
+
+    <main id="main" class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          
+          <div id="content" class="content">
+            
+
+  <div id="posts" class="posts-expand">
+    
+
+  
+
+  
+  
+  
+
+  
+
+  <article class="post post-type-normal" itemscope itemtype="http://schema.org/Article">
+  
+  
+  
+  <div class="post-block">
+    <link itemprop="mainEntityOfPage" href="http://yoursite.com/2018/07/20/浅比较与PureComponent/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="name" content="Akil">
+      <meta itemprop="description" content="">
+      <meta itemprop="image" content="/images/avatar.gif">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="Akil写字的地方">
+    </span>
+
+    
+      <header class="post-header">
+
+        
+        
+          <h1 class="post-title" itemprop="name headline">浅比较与PureComponent
+              
+            
+          </h1>
+        
+
+        <div class="post-meta">
+          <span class="post-time">
+
+            
+            
+            
+
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">发表于</span>
+              
+
+              
+                
+              
+
+              <time title="创建时间：2018-07-20 11:42:27 / 修改时间：17:08:04" itemprop="dateCreated datePublished" datetime="2018-07-20T11:42:27+08:00">2018-07-20</time>
+            
+
+            
+              
+
+              
+            
+          </span>
+
+          
+            <span class="post-category" >
+            
+              <span class="post-meta-divider">|</span>
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-folder-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">分类于</span>
+              
+              
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing"><a href="/categories/前端/" itemprop="url" rel="index"><span itemprop="name">前端</span></a></span>
+
+                
+                
+              
+            </span>
+          
+
+          
+            
+              <span class="post-comments-count">
+                <span class="post-meta-divider">|</span>
+                <span class="post-meta-item-icon">
+                  <i class="fa fa-comment-o"></i>
+                </span>
+                <a href="/2018/07/20/浅比较与PureComponent/#comments" itemprop="discussionUrl">
+                
+                  <span class="post-comments-count disqus-comment-count"
+                        data-disqus-identifier="2018/07/20/浅比较与PureComponent/" itemprop="commentCount"></span>
+                </a>
+              </span>
+            
+          
+
+          
+          
+
+          
+            <span class="post-meta-divider">|</span>
+            <span class="post-meta-item-icon"
+            >
+            <i class="fa fa-eye"></i>
+             阅读次数： 
+            <span class="busuanzi-value" id="busuanzi_value_page_pv" ></span>
+            </span>
+          
+
+          
+
+          
+
+        </div>
+      </header>
+    
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+      
+
+      
+        <h1 id="比较"><a href="#比较" class="headerlink" title="比较"></a>比较</h1><p>JS提供了三种方式来进行比较操作</p>
+<ul>
+<li><code>==</code> 比较宽松的相等比较</li>
+<li><code>===</code> 严格相等</li>
+<li><code>Object.is</code> ES6新增</li>
+</ul>
+<h2 id=""><a href="#" class="headerlink" title="=="></a>==</h2><p>如果操作数不是同一类型时会对操作数进行类型转换，然后进行严格比较。如果操作数都是对象（引用），就检查是否指向内存中的同一对象。</p>
+<figure class="highlight javascript"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br></pre></td><td class="code"><pre><span class="line"><span class="number">1</span> == <span class="number">1</span> <span class="comment">//true</span></span><br><span class="line"><span class="string">'1'</span> == <span class="number">1</span> <span class="comment">//true</span></span><br><span class="line"><span class="number">1</span> == <span class="string">'1'</span> <span class="comment">//true</span></span><br><span class="line"><span class="number">0</span> == <span class="literal">false</span> <span class="comment">//true</span></span><br><span class="line"><span class="number">0</span> == <span class="string">''</span> <span class="comment">//true</span></span><br><span class="line"></span><br><span class="line"><span class="number">0</span> == <span class="literal">null</span> <span class="comment">//false</span></span><br><span class="line"><span class="number">0</span> == <span class="literal">undefined</span> <span class="comment">//false</span></span><br><span class="line"></span><br><span class="line"><span class="literal">null</span> == <span class="literal">undefined</span> <span class="comment">//true</span></span><br><span class="line"></span><br><span class="line"><span class="literal">null</span> == <span class="literal">null</span> <span class="comment">//true</span></span><br><span class="line"><span class="literal">undefined</span> == <span class="literal">undefined</span> <span class="comment">//true</span></span><br><span class="line"></span><br><span class="line"><span class="literal">NaN</span> == <span class="literal">NaN</span> <span class="comment">//false</span></span><br><span class="line"></span><br><span class="line"><span class="literal">false</span> == <span class="literal">null</span> <span class="comment">//false</span></span><br><span class="line"><span class="literal">false</span> == <span class="literal">undefined</span> <span class="comment">//false</span></span><br><span class="line"><span class="literal">false</span> == <span class="literal">NaN</span> <span class="comment">//false</span></span><br><span class="line"></span><br><span class="line"><span class="keyword">var</span> obj1 = &#123;</span><br><span class="line">    key : <span class="string">'value'</span></span><br><span class="line">&#125;</span><br><span class="line"><span class="keyword">var</span> obj2 = &#123;</span><br><span class="line">    key : <span class="string">'value'</span></span><br><span class="line">&#125;</span><br><span class="line">obj1 == obj2 <span class="comment">//false</span></span><br></pre></td></tr></table></figure>
+<p>可以看到，数字类型、null、undefined、NaN之间都无法进行类型转换，其中NaN最特殊，<code>NaN == NaN</code>也返回<code>false</code>。</p>
+<h3 id="JS类型转换规则"><a href="#JS类型转换规则" class="headerlink" title="JS类型转换规则"></a>JS类型转换规则</h3><ul>
+<li><p>如果两个操作数为number和string，string被转成number</p>
+</li>
+<li><p>如果操作数中包含Boolean，<code>true</code>时转换成1，<code>false</code>时转换成+0</p>
+</li>
+<li><p>对象与number或string比较时，JS用对象的<code>valueOf</code>、<code>toString</code>返回number或string，然后进行比较。如果转换过程中失败会报运行错误</p>
+</li>
+<li><p>对象与对象比较时，检查是否指向同一对象。</p>
+<blockquote>
+<p>String对象是对象，而不是字符串。</p>
+</blockquote>
+<figure class="highlight javascript"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line"><span class="string">'foo'</span> === <span class="string">'foo'</span> <span class="comment">//两个都是基本数据类型string</span></span><br><span class="line"><span class="keyword">var</span> a = <span class="keyword">new</span> <span class="built_in">String</span>(<span class="string">'foo'</span>);</span><br><span class="line"><span class="keyword">var</span> b = <span class="keyword">new</span> <span class="built_in">String</span>(<span class="string">'foo'</span>);</span><br><span class="line">a == b <span class="comment">//false，因为a b都是String对象，指向不同的对象</span></span><br><span class="line">a === b <span class="comment">//false</span></span><br><span class="line"></span><br><span class="line">a == <span class="string">'foo'</span> <span class="comment">//true 左边是对象，右边是string，调用对象的toString方法然后与右边比较</span></span><br><span class="line">a === <span class="string">'foo'</span> <span class="comment">//false，类型不同</span></span><br></pre></td></tr></table></figure>
+</li>
+</ul>
+<h2 id="-1"><a href="#-1" class="headerlink" title="==="></a>===</h2><p>在没有类型转换的情况下，两个操作数严格相等。其实是在<code>==</code>的基础上更进了一步，<code>==</code>返回<code>false</code>的<code>===</code>也返回<code>false</code>，<code>==</code>返回<code>true</code>的<code>===</code>有可能返回<code>false</code>。</p>
+<figure class="highlight javascript"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"><span class="number">1</span> === <span class="string">'1'</span> <span class="comment">//false</span></span><br></pre></td></tr></table></figure>
+<h2 id="Object-is"><a href="#Object-is" class="headerlink" title="Object.is"></a>Object.is</h2><p><code>===</code>在<code>==</code>的基础上虽然更进了一步，但是对于一些特殊的比较可能得不到我们想要的结果：</p>
+<figure class="highlight javascript"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">+<span class="number">0</span> === <span class="number">-0</span> <span class="comment">//true,但我们可能想要把它们看作不同的值</span></span><br><span class="line"><span class="literal">NaN</span> === <span class="literal">NaN</span> <span class="comment">//false,这个就更反直觉了，明明一样，为什么返回false</span></span><br></pre></td></tr></table></figure>
+<p><code>Object.is()</code>对两个值进行比较，如果两者满足下面的条件之一就返回true：</p>
+<ul>
+<li>都是<code>undefined</code></li>
+<li>都是<code>null</code></li>
+<li>都是<code>true</code>或都是<code>false</code></li>
+<li>都是按相同顺序、相同字符、相同长度组成的字符串</li>
+<li>相同的对象</li>
+<li>相同数字且<ul>
+<li>都是<code>+0</code></li>
+<li>都是<code>-0</code></li>
+<li>都是<code>NaN</code></li>
+<li>非0非<code>NaN</code>相同的两个值</li>
+</ul>
+</li>
+</ul>
+<figure class="highlight javascript"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line"><span class="built_in">Object</span>.is(<span class="string">'foo'</span>,<span class="string">'foo'</span>) <span class="comment">//true</span></span><br><span class="line"><span class="built_in">Object</span>.is(<span class="built_in">window</span>, <span class="built_in">window</span>) <span class="comment">//true</span></span><br><span class="line"><span class="built_in">Object</span>.is([],[]) <span class="comment">//false</span></span><br><span class="line"><span class="built_in">Object</span>.is(<span class="literal">null</span>,<span class="literal">null</span>) <span class="comment">//true</span></span><br><span class="line"><span class="built_in">Object</span>.is(<span class="number">0</span>,<span class="number">-0</span>) <span class="comment">//false</span></span><br><span class="line"><span class="built_in">Object</span>.is(<span class="number">-0</span>,<span class="number">-0</span>) <span class="comment">//true</span></span><br><span class="line"><span class="built_in">Object</span>.is(<span class="literal">NaN</span>,<span class="number">0</span>/<span class="number">0</span>) <span class="comment">//true</span></span><br></pre></td></tr></table></figure>
+<p>因为<code>Object.is</code>是ES6新增的，如果在之前的版本中想使用，可以用下面的polyfill</p>
+<figure class="highlight javascript"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">if</span>(!<span class="built_in">Object</span>.is)&#123;</span><br><span class="line">    <span class="built_in">Object</span>.is = <span class="function"><span class="keyword">function</span>(<span class="params">x,y</span>)</span>&#123;</span><br><span class="line">        <span class="keyword">if</span>(x === y)&#123;</span><br><span class="line">            <span class="comment">// 处理 +0 === -0的问题</span></span><br><span class="line">            <span class="keyword">return</span> x !== <span class="number">0</span> || <span class="number">1</span>/x === <span class="number">1</span>/y;</span><br><span class="line">        &#125;<span class="keyword">else</span>&#123;</span><br><span class="line">            <span class="comment">// 处理NaN !==NaN</span></span><br><span class="line">            <span class="keyword">return</span> x !== x &amp;&amp; y !== y;</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>一张图来对比下三者的不同</p>
+<p><img src="http://opffh6qw3.bkt.clouddn.com/blog/images/compare.png" alt="一张图来对比下三者的不同"></p>
+<h1 id="PureComponent"><a href="#PureComponent" class="headerlink" title="PureComponent"></a>PureComponent</h1><p>React组件的渲染过程如下：</p>
+<div id="flowchart-0" class="flow-chart"></div>
+
+<p>因为DOM操作很耗时，这导致渲染操作也非常耗时，要提高组件的性能就要尽量尽可能的减少组件的重新渲染次数。</p>
+<p>纯组件是优化React应用性能最容易实现的、最重要的方式。因为纯组件能减少渲染次数所以才能显著提升性能。</p>
+<p>纯组件修改了<code>shouldComponentUpdate</code>方法并加了一些逻辑判断，从而决定是否需要重新渲染组件。只有检测到<code>state</code>或<code>props</code>变化的时候才调用<code>render</code>。因为组件本身实现了检测逻辑，我们在使用的时候只用修改<code>state</code>即可：</p>
+<figure class="highlight javascript"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">if</span>(<span class="keyword">this</span>.state.someVal !== otherVal)&#123;</span><br><span class="line">    <span class="keyword">this</span>.setState(&#123;</span><br><span class="line">        someVal: otherVal</span><br><span class="line">    &#125;)</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p><code>shouldComponentUpdate</code>的源码中有如下代码：</p>
+<figure class="highlight javascript"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">if</span>(<span class="keyword">this</span>._compositeType === CompositeTypes.PureClass)&#123;</span><br><span class="line">    shouldUpdate = !shallowEqual(prevProps, nextProps) || !shallowEqual(prevState, nextState);</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>即对于纯组件，<code>shouldComponentUpdate</code>会对<code>props</code>和<code>state</code>进行<code>浅比较</code>。<code>浅比较</code>会比较两个对象的键长度是否相同、是否拥有相同的key、是否指向同一个对象，但嵌套的对象和数组不在比较范围。</p>
+<p>因为<code>深比较</code>非常耗时。如果纯组件使用了深比较，那带来的性能损失可能大于提升;再者我们可以手动实现来决定是否需要重新渲染：</p>
+<figure class="highlight javascript"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">shouldComponentUpdate(nextProps, nextState)&#123;</span><br><span class="line">    <span class="keyword">return</span> nextProps.user.id === props.user.id;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<h2 id="用法"><a href="#用法" class="headerlink" title="用法"></a>用法</h2><p>因为纯组件做的是浅比较，所以<code>props</code>或<code>state</code>内部的变化会忽略。例如，父组件有<code>render</code>方法和点击处理函数：</p>
+<figure class="highlight javascript"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br></pre></td><td class="code"><pre><span class="line">handleClick = <span class="function"><span class="params">()</span> =&gt;</span> &#123;</span><br><span class="line">    <span class="keyword">let</span> &#123;items&#125; = <span class="keyword">this</span>.state;</span><br><span class="line">    items.push(<span class="string">'new-item'</span>);</span><br><span class="line">    <span class="keyword">this</span>.setState(&#123;items&#125;);</span><br><span class="line">&#125;</span><br><span class="line">render()&#123;</span><br><span class="line">    <span class="keyword">return</span> (</span><br><span class="line">    	&lt;div&gt;</span><br><span class="line">        	&lt;button onClick=&#123;<span class="keyword">this</span>.handleClick&#125; /&gt;</span><br><span class="line">        	&lt;ItemList items=&#123;<span class="keyword">this</span>.state.items&#125; /&gt;</span><br><span class="line">        &lt;<span class="regexp">/div&gt;</span></span><br><span class="line"><span class="regexp">    )</span></span><br><span class="line"><span class="regexp">&#125;</span></span><br></pre></td></tr></table></figure>
+<p>假设ItemList是纯组件，如果父组件点击了按钮，ItemList接收的<code>props</code>内容其实变化了，但this.state.items的指向并没有变化，因为纯组件执行的是浅比较，所以它并不会重新渲染。如果想要更新纯组件，可以这样处理：</p>
+<figure class="highlight javascript"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">handleClick = <span class="function"><span class="params">()</span> =&gt;</span> &#123;</span><br><span class="line">    <span class="keyword">this</span>.setState(<span class="function"><span class="params">prevState</span> =&gt;</span> (&#123;</span><br><span class="line">        words: prevState.items.concat([<span class="string">'new-item'</span>])</span><br><span class="line">    &#125;))</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p><code>state</code>或<code>props</code>指向了新的对象，纯组件一定会更新。<script src="https://cdnjs.cloudflare.com/ajax/libs/raphael/2.2.7/raphael.min.js"></script><script src="https://cdnjs.cloudflare.com/ajax/libs/flowchart/1.6.5/flowchart.min.js"></script><textarea id="flowchart-0-code" style="display: none">st=>start: props或state变化
+
+e1=>end: 重新更新组件及所有子组件
+e2=>end: do nothing
+
+op=>operation: diff算法
+
+cond1=>condition: shouldComponentUpdate
+cond2=>condition: 新老virtual DOM树相同吗
+
+st->cond1(yes)->op->cond2(no)->e1
+cond2(yes)->e2
+cond1(no)->e2</textarea><textarea id="flowchart-0-options" style="display: none">{"scale":1,"line-width":2,"line-length":50,"text-margin":10,"font-size":12}</textarea><script>  var code = document.getElementById("flowchart-0-code").value;  var options = JSON.parse(decodeURIComponent(document.getElementById("flowchart-0-options").value));  var diagram = flowchart.parse(code);  diagram.drawSVG("flowchart-0", options);</script></p>
+
+      
+    </div>
+
+    
+
+    
+    
+    
+
+    
+
+    
+      <div>
+        <div style="padding: 10px 0; margin: 20px auto; width: 90%; text-align: center;">
+  <div>坚持原创技术分享，您的支持将鼓励我继续创作！</div>
+  <button id="rewardButton" disable="enable" onclick="var qr = document.getElementById('QR'); if (qr.style.display === 'none') {qr.style.display='block';} else {qr.style.display='none'}">
+    <span>打赏</span>
+  </button>
+  <div id="QR" style="display: none;">
+
+    
+      <div id="wechat" style="display: inline-block">
+        <img id="wechat_qr" src="/images/wechat.jpeg" alt="Akil 微信支付"/>
+        <p>微信支付</p>
+      </div>
+    
+
+    
+      <div id="alipay" style="display: inline-block">
+        <img id="alipay_qr" src="/images/alipay.jpeg" alt="Akil 支付宝"/>
+        <p>支付宝</p>
+      </div>
+    
+
+    
+
+  </div>
+</div>
+
+      </div>
+    
+
+    
+
+    <footer class="post-footer">
+      
+        <div class="post-tags">
+          
+            <a href="/tags/React/" rel="tag"># React</a>
+          
+            <a href="/tags/JavaScript/" rel="tag"># JavaScript</a>
+          
+        </div>
+      
+
+      
+      
+      
+
+      
+        <div class="post-nav">
+          <div class="post-nav-next post-nav-item">
+            
+              <a href="/2018/07/12/组件生命周期/" rel="next" title="组件API">
+                <i class="fa fa-chevron-left"></i> 组件API
+              </a>
+            
+          </div>
+
+          <span class="post-nav-divider"></span>
+
+          <div class="post-nav-prev post-nav-item">
+            
+          </div>
+        </div>
+      
+
+      
+      
+    </footer>
+  </div>
+  
+  
+  
+  </article>
+
+
+
+    <div class="post-spread">
+      
+    </div>
+  </div>
+
+
+          </div>
+          
+
+  
+    <div class="comments" id="comments">
+      <div id="disqus_thread">
+        <noscript>
+          Please enable JavaScript to view the
+          <a href="https://disqus.com/?ref_noscript">comments powered by Disqus.</a>
+        </noscript>
+      </div>
+    </div>
+
+  
+
+
+
+        </div>
+        
+          
+  
+  <div class="sidebar-toggle">
+    <div class="sidebar-toggle-line-wrap">
+      <span class="sidebar-toggle-line sidebar-toggle-line-first"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-middle"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-last"></span>
+    </div>
+  </div>
+
+  <aside id="sidebar" class="sidebar">
+    
+    <div class="sidebar-inner">
+
+      
+
+      
+        <ul class="sidebar-nav motion-element">
+          <li class="sidebar-nav-toc sidebar-nav-active" data-target="post-toc-wrap">
+            文章目录
+          </li>
+          <li class="sidebar-nav-overview" data-target="site-overview-wrap">
+            站点概览
+          </li>
+        </ul>
+      
+
+      <section class="site-overview-wrap sidebar-panel">
+        <div class="site-overview">
+          <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
+            
+              <p class="site-author-name" itemprop="name">Akil</p>
+              <p class="site-description motion-element" itemprop="description"></p>
+          </div>
+
+          
+            <nav class="site-state motion-element">
+              
+                <div class="site-state-item site-state-posts">
+                
+                  <a href="/archives">
+                
+                    <span class="site-state-item-count">2</span>
+                    <span class="site-state-item-name">日志</span>
+                  </a>
+                </div>
+              
+
+              
+                
+                
+                <div class="site-state-item site-state-categories">
+                  <a href="/categories/index.html">
+                    
+                    
+                      
+                    
+                    <span class="site-state-item-count">1</span>
+                    <span class="site-state-item-name">分类</span>
+                  </a>
+                </div>
+              
+
+              
+                
+                
+                <div class="site-state-item site-state-tags">
+                  <a href="/tags/index.html">
+                    
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                    <span class="site-state-item-count">3</span>
+                    <span class="site-state-item-name">标签</span>
+                  </a>
+                </div>
+              
+            </nav>
+          
+
+          
+
+          
+            <div class="links-of-author motion-element">
+              
+                <span class="links-of-author-item">
+                  <a href="https://github.com/caiyanhu" target="_blank" title="GitHub"><i class="fa fa-fw fa-github"></i>GitHub</a>
+                  
+                </span>
+              
+                <span class="links-of-author-item">
+                  <a href="https://twitter.com/Akil_Tsai" target="_blank" title="Twitter"><i class="fa fa-fw fa-twitter"></i>Twitter</a>
+                  
+                </span>
+              
+            </div>
+          
+
+          
+          
+
+          
+          
+
+          
+            
+          
+          
+
+        </div>
+      </section>
+
+      
+      <!--noindex-->
+        <section class="post-toc-wrap motion-element sidebar-panel sidebar-panel-active">
+          <div class="post-toc">
+
+            
+              
+            
+
+            
+              <div class="post-toc-content"><ol class="nav"><li class="nav-item nav-level-1"><a class="nav-link" href="#比较"><span class="nav-number">1.</span> <span class="nav-text">比较</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#"><span class="nav-number">1.1.</span> <span class="nav-text">==</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#JS类型转换规则"><span class="nav-number">1.1.1.</span> <span class="nav-text">JS类型转换规则</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#-1"><span class="nav-number">1.2.</span> <span class="nav-text">===</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#Object-is"><span class="nav-number">1.3.</span> <span class="nav-text">Object.is</span></a></li></ol></li><li class="nav-item nav-level-1"><a class="nav-link" href="#PureComponent"><span class="nav-number">2.</span> <span class="nav-text">PureComponent</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#用法"><span class="nav-number">2.1.</span> <span class="nav-text">用法</span></a></li></ol></li></ol></div>
+            
+
+          </div>
+        </section>
+      <!--/noindex-->
+      
+
+      
+
+    </div>
+  </aside>
+
+
+        
+      </div>
+    </main>
+
+    <footer id="footer" class="footer">
+      <div class="footer-inner">
+        <div class="copyright">&copy; <span itemprop="copyrightYear">2018</span>
+  <span class="with-love" id="animate">
+    <i class="fa fa-fas fa-heartbeat"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">Akil</span>
+
+  
+
+  
+</div>
+
+
+
+
+
+
+
+
+
+
+
+        
+<div class="busuanzi-count">
+  <script async src="https://dn-lbstatics.qbox.me/busuanzi/2.3/busuanzi.pure.mini.js"></script>
+
+  
+    <span class="site-uv" title="总访客量">
+      <i class="fa fa-user"></i>
+      <span class="busuanzi-value" id="busuanzi_value_site_uv"></span>
+    </span>
+  
+
+  
+    <span class="site-pv" title="总访问量">
+      <i class="fa fa-eye"></i>
+      <span class="busuanzi-value" id="busuanzi_value_site_pv"></span>
+    </span>
+  
+</div>
+
+
+
+
+
+
+
+
+
+        
+      </div>
+    </footer>
+
+    
+      <div class="back-to-top">
+        <i class="fa fa-arrow-up"></i>
+        
+      </div>
+    
+
+    
+
+  </div>
+
+  
+
+<script type="text/javascript">
+  if (Object.prototype.toString.call(window.Promise) !== '[object Function]') {
+    window.Promise = null;
+  }
+</script>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+  
+    <script type="text/javascript" src="/lib/jquery/index.js?v=2.1.3"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/velocity/velocity.min.js?v=1.2.1"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/velocity/velocity.ui.min.js?v=1.2.1"></script>
+  
+
+
+  
+
+
+  <script type="text/javascript" src="/js/src/utils.js?v=6.3.0"></script>
+
+  <script type="text/javascript" src="/js/src/motion.js?v=6.3.0"></script>
+
+
+
+  
+  
+
+  
+  <script type="text/javascript" src="/js/src/scrollspy.js?v=6.3.0"></script>
+<script type="text/javascript" src="/js/src/post-details.js?v=6.3.0"></script>
+
+
+
+  
+
+
+  <script type="text/javascript" src="/js/src/bootstrap.js?v=6.3.0"></script>
+
+
+
+  
+
+  
+    <script id="dsq-count-scr" src="https://caiyanhu.disqus.com/count.js" async></script>
+  
+
+  
+    <script type="text/javascript">
+      var disqus_config = function () {
+        this.page.url = 'http://yoursite.com/2018/07/20/浅比较与PureComponent/';
+        this.page.identifier = '2018/07/20/浅比较与PureComponent/';
+        this.page.title = '浅比较与PureComponent';
+        };
+      function loadComments () {
+        var d = document, s = d.createElement('script');
+        s.src = 'https://caiyanhu.disqus.com/embed.js';
+        s.setAttribute('data-timestamp', '' + +new Date());
+        (d.head || d.body).appendChild(s);
+      }
+      
+        loadComments();
+      
+    </script>
+  
+
+
+
+
+
+  
+
+
+
+
+
+
+
+
+
+
+  <script src="//cdn1.lncld.net/static/js/3.0.4/av-min.js"></script>
+  
+  
+  <script src="//unpkg.com/valine/dist/Valine.min.js"></script>
+  
+  <script type="text/javascript">
+    var GUEST = ['nick','mail','link'];
+    var guest = 'nick,mail,link';
+    guest = guest.split(',').filter(function (item) {
+      return GUEST.indexOf(item)>-1;
+    });
+    new Valine({
+        el: '#comments' ,
+        verify: true,
+        notify: false,
+        appId: 'a8Q75dNrUEWeFRBsOPuC93n1-gzGzoHsz',
+        appKey: 'sGMcxEUapH3qhmKmV1INJTmu',
+        placeholder: 'ヾﾉ≧∀≦)o来啊，快活啊!',
+        avatar:'mm',
+        guest_info:guest,
+        pageSize:'10' || 10,
+    });
+  </script>
+
+
+
+  
+
+
+
+
+
+  
+
+  
+
+  
+
+  
+  
+
+  
+  
+
+  
+
+
+  
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+</body>
+</html>
